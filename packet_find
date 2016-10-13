@@ -16,7 +16,7 @@ Packet_Find - Usage
 
      Options:
 
-        -d (required)   Specify date to use during search: Ex. --> ./packet_find -d "2016-10-12"
+        -d              Specify date to use during search: Ex. --> ./packet_find -d "2016-10-12"
         -f              Use BPF Expression:  Ex. --> ./packet_find -f "host 1.1.1.1"
         -h              Help
 
