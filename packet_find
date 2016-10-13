@@ -4,9 +4,6 @@
 # Check for root
 [ "$(id -u)" -ne 0 ] && echo "This script must be run using sudo!" && exit 1
 
-bpfexp=""
-timecheck=""
-
 # Let's talk about how to use this thing!
 usage()
 {
