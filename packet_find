@@ -1,0 +1,90 @@
+#!/bin/sh
+# Check for root
+[ "$(id -u)" -ne 0 ] && echo "This script must be run using sudo!" && exit 1
+
+bpfexp=""
+timecheck=""
+
+# Let's talk about how to use this thing!
+usage()
+{
+cat <<EOF
+
+Packet_Find - Usage
+
+     Options:
+
+        -d (required)   Specify date to use during search: Ex. --> ./packet_find -d "2016-10-12"
+        -f              Use BPF Expression:  Ex. --> ./packet_find -f "host 1.1.1.1"
+        -h              Help
+
+Usage: $0
+
+EOF
+}
+
+# Let's declare some options!
+unset date
+while getopts "d:f:h" OPTION
+do
+     case $OPTION in
+
+         h)
+                usage
+                exit 0
+              ;;
+         f)
+                bpfexp=$OPTARG
+              ;;
+         d)
+                date=$OPTARG
+              ;;
+     esac
+done
+
+# Let's set the output directory!
+outdir=/tmp
+
+# Remove pre-existing merged PCAP
+rm -f $outdir/all.pcap
+
+# If output directory doesn't exists, create it.
+if [ ! -d $outdir ]; then
+    mkdir $outdir
+fi
+
+# If date was specified, then execute...
+if [  "$date" ]; then
+    # For each sensor interface...
+    for a in $( ls /nsm/sensor_data/ ); do
+        #Check dailylogs for the specified date
+        for c in $( ls /nsm/sensor_data/$a/dailylogs/$date ); do
+            tcpdump -r /nsm/sensor_data/$a/dailylogs/$date/$c -w $outdir/$c.pcap $bpfexp
+        done
+    done
+# Otherwise, if date wasn't specified, run against all PCAPs.
+else
+    for a in $( ls /nsm/sensor_data/ ); do
+        for b in $( ls /nsm/sensor_data/$a/dailylogs ) ; do
+            for c in $( ls /nsm/sensor_data/$a/dailylogs/$b ); do
+                tcpdump -r /nsm/sensor_data/$a/dailylogs/$b/$c -w $outdir/$c.pcap $bpfexp
+            done
+        done
+    done
+fi
+
+# Clean up PCAPs with no data...
+for file in $( ls $outdir/*.pcap ); do
+    # If file has size of 24, it has no data so rm file
+    if [ "`ls -l $file | awk '{print $5}'`" = "24" ]; then
+        rm -f "$file"
+    fi
+done
+
+# Merge all PCAPs into a single PCAP for analysis
+mergecap -w /tmp/all.pcap /tmp/*.pcap
+
+# Clean up all PCAPs, except merged PCAP
+for file in $( ls $outdir/snort.log.*.pcap ); do
+        rm -f "$file"
+done
