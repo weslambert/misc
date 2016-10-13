@@ -1,4 +1,6 @@
 #!/bin/sh
+# Adapted from: http://eatingsecurity.blogspot.com/2007/11/for-loop-with-tcpdump.html
+
 # Check for root
 [ "$(id -u)" -ne 0 ] && echo "This script must be run using sudo!" && exit 1
 
