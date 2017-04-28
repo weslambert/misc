@@ -13,9 +13,12 @@ Packet_Find - Usage
 
      Options:
 
-        -d              Specify date to use during search: Ex. --> ./packet_find -d "2016-10-12"
-        -f              Use BPF Expression:  Ex. --> ./packet_find -f "host 1.1.1.1"
+        -d              Specify date to use during search
+        -f              Use BPF Expression (MANDATORY)
         -h              Help
+        
+        Ex. Search date and filter --> sudo ./packet_find.sh -d "2017-04-28" -f "host 192.168.1.1"
+        Ex. Search filter --> sudo ./packet_find.sh -f "host 192.168.1.1"
 
 Usage: $0
 
@@ -44,12 +47,14 @@ done
 # Let's set the output directory!
 outdir=/tmp
 
-# Remove pre-existing merged PCAP
-rm -f $outdir/all.pcap
-
-# If output directory doesn't exists, create it.
+# If output dir is not created, then create it.
 if [ ! -d $outdir ]; then
     mkdir $outdir
+fi
+
+# Remove pre-existing merged PCAP
+if [ -f $outdir/all.pcap ]; then 
+    rm -f $outdir/all.pcap
 fi
 
 # If date was specified, then execute...
@@ -58,8 +63,8 @@ if [  "$date" ]; then
     for a in $( ls /nsm/sensor_data/ ); do
         #Check dailylogs for the specified date
         for c in $( ls /nsm/sensor_data/$a/dailylogs/$date ); do
-            tcpdump -r /nsm/sensor_data/$a/dailylogs/$date/$c -w $outdir/$c.pcap $bpfexp
-        done
+		tcpdump -r /nsm/sensor_data/$a/dailylogs/$date/$c -w $outdir/$c.pcap $bpfexp
+	done
     done
 # Otherwise, if date wasn't specified, run against all PCAPs.
 else
@@ -81,9 +86,21 @@ for file in $( ls $outdir/*.pcap ); do
 done
 
 # Merge all PCAPs into a single PCAP for analysis
-mergecap -w /tmp/all.pcap /tmp/*.pcap
+mergecap -w /tmp/all.pcap /tmp/*.pcap 2>/dev/null
+
+if [ -f "$outdir/all.pcap" ]; then
+    echo ""
+    echo "SUCCESS!"
+    echo ""
+    echo "Your merged PCAP has been written to $outdir/all.pcap!"
+    echo ""
+else
+    echo ""
+    echo "Sorry, no match was found :( !"
+    echo ""
+fi
 
 # Clean up all PCAPs, except merged PCAP
-for file in $( ls $outdir/snort.log.*.pcap ); do
+for file in $( ls $outdir/snort.log.*.pcap 2>/dev/null ); do
         rm -f "$file"
 done
