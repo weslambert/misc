@@ -1,0 +1,48 @@
+#!/bin/bash
+echo
+echo "Installing pip..."
+echo
+apt-get install python-pip &&
+
+echo
+echo "Installing dpkt..."
+echo
+pip install dpkt &&
+
+echo
+echo "Installing repoze..."
+echo
+pip install repoze.lru &&
+
+echo
+echo "Downloading TrimPCAP..."
+echo
+wget -O /opt/trimpcap.py https://www.netresec.com/?page=TrimPCAP
+CRON="/etc/cron.d/trimpcap"
+
+echo
+echo "Placing cron job..."
+echo
+cat <<'EOF' >> $CRON
+#/etc/cron.d/trimpcap
+#
+#crontab entry for TrimPCAP
+
+TRIMPCAP="/opt/trimpcap.py"
+LOG="/var/log/trimpcap.log"
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# Trim after 3 days
+0 1 * * * root echo $(date) >> $LOG; /usr/bin/find /nsm/sensor_data/*/dailylogs/*/* -mmin +$((60*72)) -type f -exec $TRIMPCAP 1000000 {} \; >> $LOG 2>&1;
+
+# Trim after 6 days
+0 1 * * * root /usr/bin/find /nsm/sensor_data/*/dailylogs/*/* -mmin +$((60*144)) -type f -exec $TRIMPCAP 102400 {} \; >> $LOG 2>&1;
+
+# Trim after 30 days
+0 1 * * * root /usr/bin/find /nsm/sensor_data/*/dailylogs/*/* -mmin +$((60*720)) -type f -exec $TRIMPCAP 10000 {} \; >> $LOG 2>&1;
+EOF
+
+echo
+echo "Installation complete!"
+echo
