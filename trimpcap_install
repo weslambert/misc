@@ -21,9 +21,10 @@ pip install repoze.lru &&
 echo
 echo "Downloading TrimPCAP..."
 echo
-wget -O /opt/trimpcap.py https://www.netresec.com/?page=TrimPCAP
-CRON="/etc/cron.d/trimpcap"
+wget -O /opt/trimpcap.py https://www.netresec.com/?download=trimpcap
 
+# Set cron job destination
+CRON="/etc/cron.d/trimpcap"
 echo
 echo "Placing cron job..."
 echo
