@@ -39,13 +39,13 @@ SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 # Trim after 3 days
-0 1 * * * root echo $(date) >> $LOG; /usr/bin/find /nsm/sensor_data/*/dailylogs/*/* -mmin +$((60*72)) -type f -exec $TRIMPCAP 1000000 {} \; >> $LOG 2>&1;
+0 1 * * * root echo $(date) >> $LOG; /usr/bin/find /nsm/sensor_data/ -name "snort.log.??????????" -mmin +$((60*72)) -type f -exec /usr/bin/python $TRIMPCAP 1000000 {} \; >> $LOG 2>&1;
 
 # Trim after 6 days
-0 1 * * * root /usr/bin/find /nsm/sensor_data/*/dailylogs/*/* -mmin +$((60*144)) -type f -exec $TRIMPCAP 102400 {} \; >> $LOG 2>&1;
+0 1 * * * root /usr/bin/find /nsm/sensor_data/ -name "snort.log.??????????" -mmin +$((60*144)) -type f -exec /usr/bin/python $TRIMPCAP 102400 {} \; >> $LOG 2>&1;
 
 # Trim after 30 days
-0 1 * * * root /usr/bin/find /nsm/sensor_data/*/dailylogs/*/* -mmin +$((60*720)) -type f -exec $TRIMPCAP 10000 {} \; >> $LOG 2>&1;
+0 1 * * * root /usr/bin/find /nsm/sensor_data/ -name "snort.log.??????????" -mmin +$((60*720)) -type f -exec /usr/bin/python $TRIMPCAP 10000 {} \; >> $LOG 2>&1;
 EOF
 
 echo
