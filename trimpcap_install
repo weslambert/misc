@@ -4,19 +4,9 @@
 [ "$(id -u)" -ne 0 ] && echo "This script must be run using sudo!" && exit 1
 
 echo
-echo "Installing pip..."
+echo "Installing dpkt and repoze..."
 echo
-apt-get install python-pip &&
-
-echo
-echo "Installing dpkt..."
-echo
-pip install dpkt &&
-
-echo
-echo "Installing repoze..."
-echo
-pip install repoze.lru &&
+apt install python-dpkt python-repoze.lru
 
 echo
 echo "Downloading TrimPCAP..."
@@ -39,13 +29,13 @@ SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 # Trim after 3 days
-0 1 * * * root echo $(date) >> $LOG; /usr/bin/find /nsm/sensor_data/ -name "snort.log.??????????" -mmin +$((60*72)) -type f -exec /usr/bin/python $TRIMPCAP 1000000 {} \; >> $LOG 2>&1;
+0 1 * * * root echo $(date) >> $LOG; /usr/bin/find /nsm/sensor_data/ -name "snort.log.??????????" -mmin +$((60*72)) -type f -exec /usr/bin/python $TRIMPCAP 1048576 {} \; >> $LOG 2>&1;
 
 # Trim after 6 days
-0 1 * * * root /usr/bin/find /nsm/sensor_data/ -name "snort.log.??????????" -mmin +$((60*144)) -type f -exec /usr/bin/python $TRIMPCAP 102400 {} \; >> $LOG 2>&1;
+0 1 * * * root echo $(date) >> $LOG; /usr/bin/find /nsm/sensor_data/ -name "snort.log.??????????" -mmin +$((60*144)) -type f -exec /usr/bin/python $TRIMPCAP 104448 {} \; >> $LOG 2>&1;
 
 # Trim after 30 days
-0 1 * * * root /usr/bin/find /nsm/sensor_data/ -name "snort.log.??????????" -mmin +$((60*720)) -type f -exec /usr/bin/python $TRIMPCAP 10000 {} \; >> $LOG 2>&1;
+0 1 * * * root echo $(date) >> $LOG; /usr/bin/find /nsm/sensor_data/ -name "snort.log.??????????" -mmin +$((60*720)) -type f -exec /usr/bin/python $TRIMPCAP 10240 {} \; >> $LOG 2>&1;
 EOF
 
 echo
